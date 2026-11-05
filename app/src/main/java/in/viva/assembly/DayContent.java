@@ -40,6 +40,11 @@ final class DayContent {
         INTERNATIONAL.put("11-20","World Children's Day");
         INTERNATIONAL.put("12-03","International Day of Persons with Disabilities");
         INTERNATIONAL.put("12-10","Human Rights Day");
+        NATIONAL.put("08-29",new String[]{"National Sports Day","https://www.pib.gov.in/PressReleasePage.aspx?PRID=2304768"});
+        NATIONAL.put("09-05",new String[]{"Teachers' Day","https://www.pib.gov.in/PressReleasePage.aspx?PRID=1501632"});
+        NATIONAL.put("11-14",new String[]{"Children's Day","https://aminoo.kvs.ac.in/en/calendar-of-activities/"});
+        NATIONAL.put("11-26",new String[]{"Constitution Day","https://aminoo.kvs.ac.in/en/calendar-of-activities/"});
+        NATIONAL.put("12-22",new String[]{"National Mathematics Day","https://www.pib.gov.in/newsite/erelcontent.aspx?relid=79204"});
         NATIONAL.put("01-26",new String[]{"Republic Day","https://knowindia.india.gov.in/national-identity-elements/national-days.php"});
         NATIONAL.put("02-28",new String[]{"National Science Day","https://www.ursc.gov.in/nsd.jsp"});
         NATIONAL.put("08-15",new String[]{"Independence Day","https://knowindia.india.gov.in/national-identity-elements/national-days.php"});

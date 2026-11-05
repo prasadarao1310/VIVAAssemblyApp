@@ -49,7 +49,8 @@ final class PdfMaker {
         section(right,"Thought of the day",d.thought,rightWidth);
         add(right,"Original thought; editable by the teacher.",7.5f,MUTED,false,rightWidth);
         int l=0,r=0,pageNo=0;
-        try(PdfDocument pdf=new PdfDocument()){
+        PdfDocument pdf=new PdfDocument();
+        try{
             while(l<left.size()||r<right.size()){
                 PdfDocument.Page page=pdf.startPage(new PdfDocument.PageInfo.Builder(595,842,++pageNo).create());
                 Canvas c=page.getCanvas();Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -78,7 +79,7 @@ final class PdfMaker {
                 pdf.finishPage(page);
             }
             ByteArrayOutputStream out=new ByteArrayOutputStream();pdf.writeTo(out);return out.toByteArray();
-        }
+        } finally { pdf.close(); }
     }
     private static int drawColumn(Canvas c,List<Line> lines,int index,float x,float y,float bottom){
         Paint p=new Paint(Paint.ANTI_ALIAS_FLAG);

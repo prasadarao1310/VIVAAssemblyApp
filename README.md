@@ -23,7 +23,7 @@ Typical short content fits one two-column A4 sheet (595 × 842 PDF points). Long
 - Online retrieval from Google News RSS, using category queries and a bounded date window.
 - Source freshness filtering, exact normalized headline deduplication and a small sensitive-topic exclusion filter.
 - Nambur forecast from Open-Meteo, approximate coordinates 16.36 N / 80.53 E. Daily high/low, conditions and maximum rain probability.
-- Limited fixed-date starter calendar: 30 international and 5 Indian observances, with official source links.
+- Limited fixed-date starter calendar: 30 international and 10 Indian observances, with official source links.
 - A different word, definition/example and original thought each day from a 31-day rotating bank.
 - Monthly affirmation, keyed by year and month, typed or imported from a text file.
 - Date-specific local drafts, review state, logo import, A4 PDF preview and export.

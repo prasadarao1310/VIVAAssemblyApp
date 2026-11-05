@@ -32,6 +32,18 @@ jobs:
           key: viva-assembly-debug-signing-v1
       - name: Test, lint and build
         run: gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+      - name: Check live news feeds
+        continue-on-error: true
+        run: |
+          mkdir -p /tmp/viva-feed-probe
+          javac -d /tmp/viva-feed-probe app/src/main/java/in/viva/assembly/DayContent.java app/src/main/java/in/viva/assembly/NewsEngine.java tools/ServiceProbe.java
+          java -cp /tmp/viva-feed-probe in.viva.assembly.ServiceProbe
+          python3 - <<'PY'
+          import json, urllib.request
+          url = "https://api.open-meteo.com/v1/forecast?latitude=16.36&longitude=80.53&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FKolkata&forecast_days=16"
+          data = json.load(urllib.request.urlopen(url, timeout=20))
+          print("Weather:", len(data["daily"]["time"]), "forecast days; timezone:", data["timezone"])
+          PY
       - name: Verify and package
         run: |
           mkdir -p deliverables
