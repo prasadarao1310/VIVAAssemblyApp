@@ -96,7 +96,7 @@ final class PdfMaker {
             int colon=text.indexOf(':');
             if(!bold&&size>=11&&colon>0&&colon<90)content.setSpan(new StyleSpan(Typeface.BOLD),0,colon+1,Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             StaticLayout layout=StaticLayout.Builder.obtain(content,0,content.length(),paint,WIDTH)
-                .setIncludePad(false).setLineSpacing(1.5f,1.1f).setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY).build();
+                .setIncludePad(false).setLineSpacing(1.5f,1.1f).build();
             int line=0;
             while(line<layout.getLineCount()){
                 if(y+size*1.6f>BOTTOM)newPage();
