@@ -1,80 +1,85 @@
-# VIVA Assembly Companion
+# VIVA Assembly Companion — 0.2.0
 
-Native Android assembly preparation app for **VIVA The School, Nambur, Guntur**.
+Android app for VIVA The School, Nambur, Guntur.
 
-## Download
+## Install / update
+Download **VIVA-Assembly-Android-APK** from a successful **Build VIVA Assembly APK** Actions run. Extract the ZIP and install **VIVA-Assembly-0.2.0.apk**. Android 8.0+; package `in.viva.assembly`. Updates keep local drafts, affirmations and the selected logo when signed with the cached CI key.
 
-Open **Actions → Build VIVA Assembly APK**, select a successful run, download **VIVA-Assembly-Android-APK**, extract the ZIP, and install **VIVA-Assembly-0.1.0.apk**. Requires Android 8.0+ (API 26). This is a debug APK for school evaluation, not a Play Store release.
+## Requested editorial policy
 
-## First use
+| Category | Allowed publishers |
+|---|---|
+| International | The Indian Express; The Hindu |
+| National | The Indian Express; The Hindu |
+| Indian sports internationally | The Indian Express; The Hindu |
+| Andhra Pradesh | ఈనాడు (eenadu.net); ఆంధ్రజ్యోతి (andhrajyothy.com); సాక్షి (sakshi.com) |
 
-1. Choose the assembly date (India time).
-2. Tap **Refresh news & weather**. It retrieves suggestions for 2 international, 2 national, 2 Andhra Pradesh and 2 Indian sports international headlines.
-3. Read the linked sources and edit the wording and categories for your students. **Choose** offers alternatives from the fetched feed; **Source** edits publication details or opens the article.
-4. On **Assembly**, review weather and observances, enter the month's affirmation or import a UTF-8 **.txt** file, and edit the word/meaning/example and thought.
-5. On **A4 export**, select the original VIVA logo image supplied by the school. It is copied into private app storage and reused; its proportions are preserved. The attachment could not be bundled from the chat environment, so this one-time selection is required.
-6. Review the content, tick the review checkbox, then **Preview & save PDF**. Choose a folder through Android's document picker. Open the saved PDF in My Files to print/share it.
+**The publication date must be exactly the assembly date minus one, in Asia/Kolkata.** For a 5 November assembly, only publications from 4 November, 00:00–23:59 IST, qualify. Neither older reports, today's reports, nor today's match fixtures are substituted. Month/year/leap-day boundaries are handled with calendar arithmetic. Future publication timestamps are rejected.
 
-Typical short content fits one two-column A4 sheet (595 × 842 PDF points). Longer entries continue on additional A4 pages, with no silent clipping. Preview includes every page. If you need exactly one page, shorten the editable entries after checking the preview. Unreviewed exports say DRAFT.
+Google News RSS is used for discovery, with publisher-restricted queries. Every result is then checked against the publisher-domain allowlist and exact IST date; the query alone is not trusted. Names such as “The Hindu” do not pass without matching domain provenance. Google News links must carry approved publisher-domain metadata. Direct manual links must belong to an allowed publisher.
 
-## Included
+Feed dates are metadata and may reflect an updated article. **A teacher must open the original article, verify its original publication date, check facts/context, and confirm the category before assembly.** This is not independent fact-checking or a guarantee that every story is accurate. Edit the source date if needed; the app enforces the entered publication date. Paywalled content is not bypassed.
 
-- Eight editable headline slots with publisher, article link and publication time.
-- Online retrieval from Google News RSS, using category queries and a bounded date window.
-- Source freshness filtering, exact normalized headline deduplication and a small sensitive-topic exclusion filter.
-- Nambur forecast from Open-Meteo, approximate coordinates 16.36 N / 80.53 E. Daily high/low, conditions and maximum rain probability.
-- Limited fixed-date starter calendar: 30 international and 10 Indian observances, with official source links.
-- A different word, definition/example and original thought each day from a 31-day rotating bank.
-- Monthly affirmation, keyed by year and month, typed or imported from a text file.
-- Date-specific local drafts, review state, logo import, A4 PDF preview and export.
-- Offline editing/export of saved drafts. Network needed only for refresh and opening links.
-- Unit tests for RSS parsing, unsafe XML/URLs, date boundaries, duplicates and text wrapping.
+There are two editable slots per category. Missing eligible stories remain empty: no invented story, other publisher, or older-day fallback. Manual entries use the same publisher/date checks. Unchanged saved entries that fail the new rules are cleared on refresh. Edits made during a refresh are preserved but cannot be exported until corrected. Export independently revalidates all eight entries, even if the review checkbox is already ticked. Exact normalized duplicates are rejected.
 
-## Editorial limitations
+Andhra Pradesh uses the Telugu Google News edition and keeps the original Telugu headline text. Teachers can rewrite it in English after reading the article; no unverified automatic translation is generated. Android text shaping is used in the PDF for Telugu.
 
-This app fetches headlines; it does **not** independently fact-check articles or generate AI summaries. Read and rewrite headlines before presenting them. RSS results may be off-topic, and a keyword filter cannot guarantee school suitability or that a sports story involves Indian participation internationally.
+## Importance of the day
 
-The date window is the selected day plus the two preceding calendar days, bounded by the present time. Future assembly dates use currently available news and display a warning. Old assemblies may have no retrievable feed results. Fewer than two suitable items leave slots empty or retain existing edited content with an explicit status; no replacement news is fabricated. Publication dates remain visible. Failed refreshes preserve existing drafts.
+International and Indian significance remain editable. Verified entries in the limited starter calendar now include 100-plus-word educational notes. These distinguish an observance's name/date from suggested classroom discussion, and do not invent annual themes or unsupported historical details.
 
-The observance calendar is deliberately incomplete and does not contain movable dates or all national days. “No entry” means no entry in this starter calendar, not that no observance exists. Use official sources and edit the field when needed. Annual themes are not invented. The default thoughts are original lines, not quotations attributed to famous people.
+**The combined Importance of the Day section must contain at least 100 words.** A live word count is shown, and PDF export is blocked below that threshold. Known entries generally exceed 100 words individually. An unknown entry is explicitly marked unverified; if neither calendar has an entry, a teacher must add a sourced note to reach the minimum. Missing dates are not filled with invented celebrations.
 
-The weather endpoint supports today through the next 15 days. Older dates need a teacher-supplied report or a previously saved forecast. It is a model forecast for the vicinity, not an on-campus station reading. Weather data attribution: **Open-Meteo, CC BY 4.0**. The free endpoint is for non-commercial use; review provider terms before any commercial distribution.
+The reference PDF was used for arrangement, not as a factual source. In particular, Ayurveda Day is not labelled as 5 November; the Ministry of Ayush designated 23 September from 2025 onwards.
 
-## Privacy and storage
+## A4 layout
 
-No login, advertising SDK, AI key or analytics SDK. Drafts, affirmations and selected logo stay in the app's private storage. Android backup is disabled. Refresh sends category/date queries to Google News and fixed approximate village coordinates to Open-Meteo; it does not upload the affirmation, logo or edited sheet. PDFs are saved only to the destination selected by the user. Uninstalling removes private drafts.
+Single column, matching the supplied example's sequence:
+1. Morning news heading with the exact previous-day date.
+2. International — two items.
+3. National — two items.
+4. Andhra Pradesh — two items.
+5. Indian sports internationally — two items.
+6. Namburu weather.
+7. A new A4 page: Importance of the Day (international, then national).
+8. Thought for the Day.
+9. Monthly affirmation.
+10. Word for the Day, with part of speech, pronunciation, meaning and usage.
 
-## Build
+The VIVA logo keeps its proportions. Select the supplied original logo once under **A4 export**. Standard content targets two A4 pages; long edits continue to additional A4 pages without lost text. The PDF uses Android StaticLayout for text shaping and line wrapping. This is a genuine PDF export, not a screenshot.
 
-JDK 17, Gradle 8.11.1, Android Gradle Plugin 8.9.2, Android SDK 35 / Build Tools 35.0.0.
+## Daily use
+Choose the assembly date → Refresh → inspect publisher/date and original article → edit the eight entries → review significance, thought and word → enter/import monthly affirmation (.txt) → select school logo → preview/save A4 PDF. The weather is for the assembly date, while news is for the previous date.
 
+Affirmations are stored separately by year/month. Word and original thought banks rotate every 31 days. Uploaded logo, existing affirmations and custom edits are preserved across this update. Old default observance labels are upgraded to notes; custom text is not overwritten. Old review flags are reset after migration.
+
+Weather: Open-Meteo, approximate Nambur coordinates 16.36 N / 80.53 E, daily conditions, high/low and maximum rain probability. It is a model forecast, not an on-campus observation. Forecasts are available for today through the next 15 days. Source attribution: Open-Meteo, CC BY 4.0; free API intended for non-commercial use.
+
+## Privacy
+No login, ads, AI key or analytics SDK. Drafts and branding stay in private app storage; Android backup is disabled. Refresh sends news queries/dates to Google News and fixed village coordinates to Open-Meteo. The affirmation, logo and edited sheet are not uploaded. Uninstalling deletes private drafts.
+
+## Build and validation
+JDK 17, Gradle 8.11.1, AGP 8.9.2, SDK 35 / Build Tools 35.0.0.
 ```sh
-sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 gradle --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ```
+Use installed Gradle or generate a wrapper with `gradle wrapper --gradle-version 8.11.1`.
 
-No Gradle wrapper binary is bundled in this initial source tree. Use installed Gradle 8.11.1 or generate a wrapper with `gradle wrapper --gradle-version 8.11.1`. Output: `app/build/outputs/apk/debug/app-debug.apk`.
+CI runs unit tests and Android lint, performs an informational live-feed/weather check, builds the APK, verifies the signature and uploads metadata/checksums. Feed availability varies; a successful build does not guarantee two stories for every category/date. Debug signing key is cached; losing that cache can require reinstalling, which deletes local data.
 
-GitHub Actions tests, lints, builds, verifies the APK signature and uploads APK metadata/checksum alongside the APK. It caches the debug signing key for update installs. If that cache is lost, a subsequent debug build may require uninstalling the old build; export needed sheets first.
+Regression tests cover:
+- Exact previous-day IST start/end, adjacent-day rejection, future dates, year and leap-day boundaries.
+- Allowed publishers by category, spoofed domains, misleading names and missing provenance.
+- Missing dates, malicious XML, unsafe links and duplicate headlines.
+- 100-word threshold, verified note lengths, unverified-day handling and vocabulary fields.
+- Text wrapping and Unicode preservation.
 
-## Device acceptance checks — not yet performed on a physical Samsung
+Physical Samsung installation, updated PDF visual appearance, Telugu font rendering, printer margins and on-device networking still require device acceptance testing.
 
-- Install; check every tab and date picker.
-- Fetch online; confirm all category assignments and timestamps against source articles.
-- Edit during refresh; confirm changed text is preserved.
-- Disconnect internet; confirm errors do not erase existing text.
-- Change months; confirm affirmations remain attached to the correct month.
-- Import the supplied VIVA logo and a UTF-8 affirmation file.
-- Export a normal sheet and an intentionally long sheet; inspect all A4 pages.
-- Rotate the phone while the document picker is open; check PDF save.
-- Test dates outside weather range and unavailable observance entries.
-- Inspect font rendering, logo clarity and print margins on the Samsung device/printer.
-
-Sources / service documentation:
+Official calendar / provider references:
 - https://www.un.org/en/observances/list-days-weeks
 - https://knowindia.india.gov.in/national-identity-elements/national-days.php
 - https://www.ursc.gov.in/nsd.jsp
 - https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=2072203
+- https://ayush.gov.in/resources/pdf/PressRelease/Ayurveda_Day_to_Be_Celebrated_on_23rd_September_Every_Year.pdf
 - https://open-meteo.com/en/docs
-- https://open-meteo.com/en/terms
-- https://news.google.com/

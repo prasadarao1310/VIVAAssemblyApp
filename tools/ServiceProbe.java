@@ -14,7 +14,7 @@ public class ServiceProbe {
                     String xml;
                     try(java.io.InputStream in=c.getInputStream()){xml=new String(in.readNBytes(2_000_000),StandardCharsets.UTF_8);}
                     List<NewsEngine.Item> parsed=NewsEngine.parse(xml);
-                    List<NewsEngine.Item> chosen=NewsEngine.choose(parsed,DayContent.today(),Instant.now(),used);
+                    List<NewsEngine.Item> chosen=NewsEngine.choose(parsed,i,DayContent.today(),Instant.now(),used);
                     System.out.println(NewsEngine.CATEGORIES[i]+": "+parsed.size()+" parsed, "+chosen.size()+" eligible selected");
                     if(chosen.isEmpty())failures++;
                 }finally{c.disconnect();}

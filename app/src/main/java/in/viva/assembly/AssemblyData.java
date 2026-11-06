@@ -22,20 +22,28 @@ final class AssemblyData {
             JSONObject j=new JSONObject(prefs(c).getString("day:"+date,"{}"));
             JSONArray a=j.optJSONArray("news");
             if(a!=null)for(int i=0;i<Math.min(a.length(),8);i++){
-                JSONObject item=a.getJSONObject(i);d.news[i]=new NewsEngine.Item(item.optString("title"),item.optString("source"),item.optString("url"),item.optString("published"));
+                JSONObject item=a.getJSONObject(i);d.news[i]=new NewsEngine.Item(item.optString("title"),item.optString("source"),item.optString("url"),item.optString("published"),item.optString("publisherUrl"));
             }
             d.weather=j.optString("weather");d.weatherSource=j.optString("weatherSource");d.weatherFetched=j.optString("weatherFetched");
             d.international=j.optString("international",d.international);d.national=j.optString("national",d.national);
             d.word=j.optString("word",d.word);d.thought=j.optString("thought",d.thought);
             d.fetched=j.optString("fetched");d.status=j.optString("status",d.status);d.reviewed=j.optBoolean("reviewed",false)&&j.optString("affirmationAtReview").equals(d.affirmation(c));
+            if(j.optInt("schema",0)<2){
+                if(d.word.equals(DayContent.legacyWord(date)))d.word=DayContent.word(date);
+                if(d.international.equals(DayContent.INTERNATIONAL.getOrDefault(date.toString().substring(5),""))||d.international.startsWith("No entry"))d.international=DayContent.international(date);
+                String[] national=DayContent.NATIONAL.get(date.toString().substring(5));
+                if((national!=null&&d.national.equals(national[0]))||d.national.startsWith("No entry"))d.national=DayContent.national(date);
+                d.reviewed=false;
+                d.status="Previous-day/source rules changed. Refresh and review this saved draft.";
+            }
         }catch(JSONException ignored){}
         return d;
     }
     void save(Context c){
         try{
             JSONObject j=new JSONObject();JSONArray a=new JSONArray();
-            for(NewsEngine.Item n:news)a.put(new JSONObject().put("title",n.title).put("source",n.source).put("url",n.url).put("published",n.published));
-            j.put("news",a).put("weather",weather).put("weatherSource",weatherSource).put("weatherFetched",weatherFetched)
+            for(NewsEngine.Item n:news)a.put(new JSONObject().put("title",n.title).put("source",n.source).put("url",n.url).put("published",n.published).put("publisherUrl",n.publisherUrl));
+            j.put("schema",2).put("news",a).put("weather",weather).put("weatherSource",weatherSource).put("weatherFetched",weatherFetched)
              .put("international",international).put("national",national).put("word",word).put("thought",thought)
              .put("fetched",fetched).put("status",status).put("reviewed",reviewed).put("affirmationAtReview",reviewed?affirmation(c):"");
             prefs(c).edit().putString("day:"+date,j.toString()).apply();

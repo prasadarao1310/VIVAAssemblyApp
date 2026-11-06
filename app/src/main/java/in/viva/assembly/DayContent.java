@@ -51,8 +51,8 @@ final class DayContent {
         NATIONAL.put("10-02",new String[]{"Gandhi Jayanti","https://knowindia.india.gov.in/national-identity-elements/national-days.php"});
         NATIONAL.put("11-11",new String[]{"National Education Day","https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=2072203"});
     }
-    static String international(LocalDate d){return INTERNATIONAL.getOrDefault(d.toString().substring(5),"No entry in the starter calendar. Check an official calendar or add a verified observance.");}
-    static String national(LocalDate d){String[] v=NATIONAL.get(d.toString().substring(5));return v==null?"No entry in the starter calendar. Check an official calendar or add a verified observance.":v[0];}
+    static String international(LocalDate d){return ObservanceNotes.international(d);}
+    static String national(LocalDate d){return ObservanceNotes.national(d);}
     static String nationalSource(LocalDate d){String[] v=NATIONAL.get(d.toString().substring(5));return v==null?"":v[1];}
     static final String[][] WORDS={
         {"Resilience","The ability to recover after difficulties.","Our resilience helped us try again after the experiment failed."},
@@ -121,6 +121,19 @@ final class DayContent {
         "Finish the day knowing you made an honest effort."
     };
     static int index(LocalDate d,int length){return (int)Math.floorMod(d.toEpochDay(),(long)length);}
-    static String word(LocalDate d){String[] w=WORDS[index(d,WORDS.length)];return w[0]+" — "+w[1]+"\nExample: "+w[2];}
+    static String legacyWord(LocalDate d){String[] w=WORDS[index(d,WORDS.length)];return w[0]+" — "+w[1]+"\nExample: "+w[2];}
+    static final String[] PRONUNCIATIONS={
+        "ri-ZIL-yuhns","kyoo-ree-OS-i-tee","in-TEG-ri-tee","EM-puh-thee","pur-suh-VEER-uhns",
+        "GRAT-i-tyood","ih-NISH-uh-tiv","DIL-i-juhns","koh-op-uh-RAY-shuhn","uh-dap-tuh-BIL-i-tee",
+        "kuhm-PASH-uhn","KLAIR-i-tee","ri-SORS-ful","MYND-ful","in-KLOO-siv","di-SURN-muhnt",
+        "OP-ti-miz-uhm","uh-kown-tuh-BIL-i-tee","IN-uh-vayt","suh-STAY-nuh-buhl","per-SPEK-tiv",
+        "PAY-shuhns","ri-SPEKT","ded-i-KAY-shuhn","PROO-duhnt","KUR-ij","uhb-ZURV",
+        "ri-FLEKT","uh-SPYR","kuhn-TRIB-yoot","hyoo-MIL-i-tee"
+    };
+    static String word(LocalDate d){
+        int i=index(d,WORDS.length);String[] w=WORDS[i];
+        String type=Arrays.asList(18,26,27,28,29).contains(i)?"Verb":Arrays.asList(12,13,14,19,24).contains(i)?"Adjective":"Noun";
+        return w[0]+" ("+type+")\nPronunciation: "+PRONUNCIATIONS[i]+"\nMeaning: "+w[1]+"\nUsage in a sentence: "+w[2];
+    }
     static String thought(LocalDate d){return THOUGHTS[index(d,THOUGHTS.length)];}
 }

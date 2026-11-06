@@ -36,7 +36,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p /tmp/viva-feed-probe
-          javac -d /tmp/viva-feed-probe app/src/main/java/in/viva/assembly/DayContent.java app/src/main/java/in/viva/assembly/NewsEngine.java tools/ServiceProbe.java
+          javac -d /tmp/viva-feed-probe app/src/main/java/in/viva/assembly/DayContent.java app/src/main/java/in/viva/assembly/ObservanceNotes.java app/src/main/java/in/viva/assembly/NewsEngine.java tools/ServiceProbe.java
           java -cp /tmp/viva-feed-probe in.viva.assembly.ServiceProbe
           python3 - <<'PY'
           import json, urllib.request
@@ -47,11 +47,11 @@ jobs:
       - name: Verify and package
         run: |
           mkdir -p deliverables
-          cp app/build/outputs/apk/debug/app-debug.apk deliverables/VIVA-Assembly-0.1.0.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs deliverables/VIVA-Assembly-0.1.0.apk > deliverables/signature.txt
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging deliverables/VIVA-Assembly-0.1.0.apk > deliverables/apk-info.txt
+          cp app/build/outputs/apk/debug/app-debug.apk deliverables/VIVA-Assembly-0.2.0.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs deliverables/VIVA-Assembly-0.2.0.apk > deliverables/signature.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging deliverables/VIVA-Assembly-0.2.0.apk > deliverables/apk-info.txt
           cd deliverables
-          sha256sum VIVA-Assembly-0.1.0.apk > SHA256SUMS.txt
+          sha256sum VIVA-Assembly-0.2.0.apk > SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
           name: VIVA-Assembly-Android-APK

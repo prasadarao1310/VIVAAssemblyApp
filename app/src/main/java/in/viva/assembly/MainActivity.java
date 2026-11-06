@@ -23,7 +23,7 @@ public final class MainActivity extends Activity {
     private final ExecutorService worker=Executors.newFixedThreadPool(2);
     private LinearLayout root,body,tabs;
     private Button dateButton,refreshButton;
-    private TextView status;
+    private TextView status,importanceCount;
     private AssemblyData data;
     private int tab;
     private boolean fetching=false;
@@ -70,12 +70,12 @@ public final class MainActivity extends Activity {
         box.addView(e,new LinearLayout.LayoutParams(-1,-2));
         e.addTextChangedListener(new TextWatcher(){
             public void beforeTextChanged(CharSequence s,int start,int count,int after){}
-            public void onTextChanged(CharSequence s,int start,int before,int count){save.accept(s.toString());data.reviewed=false;data.save(MainActivity.this);}
+            public void onTextChanged(CharSequence s,int start,int before,int count){save.accept(s.toString());data.reviewed=false;data.save(MainActivity.this);updateImportanceCount();}
             public void afterTextChanged(Editable value){}
         });return e;
     }
     private void render(){
-        body.removeAllViews();dateButton.setText(data.date.format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy",Locale.ENGLISH))+"  ▾");
+        body.removeAllViews();importanceCount=null;dateButton.setText(data.date.format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy",Locale.ENGLISH))+"  ▾");
         for(int i=0;i<3;i++)((Button)tabs.getChildAt(i)).setTextColor(i==tab?PURPLE:MUTED);
         if(tab==0)news();else if(tab==1)assembly();else exportScreen();
     }
@@ -85,12 +85,12 @@ public final class MainActivity extends Activity {
         },data.date.getYear(),data.date.getMonthValue()-1,data.date.getDayOfMonth()).show();
     }
     private void news(){
-        LinearLayout top=card("Eight headlines. One clear assembly.");
-        top.addView(text("Fetch suggestions, read the sources and edit the wording for your students. Topic filters are not a substitute for teacher review.",14,MUTED));
+        LinearLayout top=card("News from the previous day only");
+        top.addView(text("International / National / Sports: The Indian Express and The Hindu. Andhra Pradesh: Eenadu, Andhra Jyothy and Sakshi. Publication date must be exactly the previous calendar day in India time. Read the original articles before assembly.",14,MUTED));
         refreshButton=button(fetching?"Fetching news & weather…":"Refresh news & weather",this::confirmRefresh);refreshButton.setEnabled(!fetching);top.addView(refreshButton);
-        status=text(data.status,13,MUTED);top.addView(status);
+        status=text(data.status,13,MUTED);top.addView(status);top.addView(text("Required news date: "+data.date.minusDays(1)+" (00:00–23:59 IST)",14,PURPLE));
         if(!data.fetched.isEmpty())top.addView(text("Last successful news refresh: "+PdfMaker.stamp(data.fetched),12,MUTED));
-        if(data.date.isAfter(DayContent.today()))top.addView(text("Future assembly: news can only reflect reports available now. Refresh again nearer the assembly.",13,PURPLE));
+        if(data.date.isAfter(DayContent.today()))top.addView(text("Future assembly: the required previous day may be incomplete or not yet available. No other day's news will be substituted.",13,PURPLE));
         for(int c=0;c<4;c++){
             LinearLayout box=card(NewsEngine.CATEGORIES[c]);
             for(int n=0;n<2;n++){
@@ -112,7 +112,7 @@ public final class MainActivity extends Activity {
         if(fetching)return;
         boolean has=false;for(NewsEngine.Item i:data.news)if(!i.title.isEmpty())has=true;
         if(has)new AlertDialog.Builder(this).setTitle("Refresh this assembly?")
-            .setMessage("Available new suggestions will replace unchanged headlines. If a feed fails, existing text is kept. Edits you make while fetching are preserved.")
+            .setMessage("Only the approved publishers and "+data.date.minusDays(1)+" publication date are accepted. Existing entries that fail these rules will be cleared unless you are editing them. Changed text is preserved for correction.")
             .setPositiveButton("Refresh",(d,w)->refreshOnline()).setNegativeButton("Cancel",null).show();
         else refreshOnline();
     }
@@ -127,13 +127,16 @@ public final class MainActivity extends Activity {
                 int added=0;Set<String> used=new HashSet<>();
                 for(int i=0;i<8;i++)if(!data.news[i].stamp().equals(before.news[i].stamp()))used.add(NewsEngine.canonical(data.news[i].title));
                 for(int c=0;c<4;c++){
-                    List<NewsEngine.Item> chosen=NewsEngine.choose(new ArrayList<>(result.candidates.get(c)),selected,Instant.now(),used);
+                    List<NewsEngine.Item> chosen=NewsEngine.choose(new ArrayList<>(result.candidates.get(c)),c,selected,Instant.now(),used);
                     int next=0;
                     for(int n=0;n<2;n++){
                         int i=c*2+n;
-                        if(data.news[i].stamp().equals(before.news[i].stamp())&&next<chosen.size()){data.news[i]=chosen.get(next++).copy();added++;}
+                        if(data.news[i].stamp().equals(before.news[i].stamp())){
+                            if(next<chosen.size()){data.news[i]=chosen.get(next++).copy();added++;}
+                            else if(!NewsEngine.eligible(data.news[i],c,selected,Instant.now()))data.news[i]=new NewsEngine.Item();
+                        }
                     }
-                    if(chosen.size()<2)result.messages.add(NewsEngine.CATEGORIES[c]+": fewer than two fresh suggestions; check remaining slots.");
+                    if(chosen.size()<2)result.messages.add(NewsEngine.CATEGORIES[c]+": fewer than two approved previous-day suggestions. Add a verified article from an allowed publisher.");
                 }
                 if(!result.weather.isEmpty()&&data.weather.equals(before.weather)){
                     data.weather=result.weather;data.weatherSource="Open-Meteo";data.weatherFetched=result.weatherFetched;
@@ -148,8 +151,8 @@ public final class MainActivity extends Activity {
         if(candidates.size()<4){toast("Refresh news first, or type a verified headline.");return;}
         List<NewsEngine.Item> valid=new ArrayList<>();
         for(NewsEngine.Item item:candidates.get(category))
-            if(NewsEngine.recent(item,data.date,Instant.now())&&NewsEngine.suitable(item.title))valid.add(item);
-        if(valid.isEmpty()){toast("No recent suggestions found for this category.");return;}
+            if(NewsEngine.eligible(item,category,data.date,Instant.now()))valid.add(item);
+        if(valid.isEmpty()){toast("No approved previous-day suggestions found for this category.");return;}
         String[] labels=new String[Math.min(valid.size(),15)];
         for(int i=0;i<labels.length;i++)labels[i]=valid.get(i).title+"\n"+valid.get(i).source;
         new AlertDialog.Builder(this).setTitle("Choose a headline").setItems(labels,(dialog,which)->{
@@ -172,7 +175,7 @@ public final class MainActivity extends Activity {
                 if(!item.published.isEmpty()&&Instant.parse(item.published).atZone(DayContent.ZONE).toLocalDate().toString().equals(date))iso=item.published;
                 else iso=LocalDate.parse(date).atStartOfDay(DayContent.ZONE).toInstant().toString();
             }catch(Exception e){toast("Use YYYY-MM-DD for publication date.");return;}
-            item.source=source.getText().toString().trim();item.url=link;item.published=iso;data.reviewed=false;data.save(this);dialog.dismiss();render();
+            if(!item.url.equals(link))item.publisherUrl="";item.source=source.getText().toString().trim();item.url=link;item.published=iso;data.reviewed=false;data.save(this);dialog.dismiss();render();
         }));dialog.show();
     }
     private void assembly(){
@@ -182,12 +185,13 @@ public final class MainActivity extends Activity {
         if(!data.weatherFetched.isEmpty())weather.addView(text("Fetched: "+PdfMaker.stamp(data.weatherFetched)+" · "+data.weatherSource,12,MUTED));
         weather.addView(button("Refresh news & weather",this::confirmRefresh));
         LinearLayout international=card("Importance of the day · International");
-        edit(international,data.international,"Add a verified international observance.",1200,value->data.international=value);
+        edit(international,data.international,"Add a verified international observance.",6000,value->data.international=value);
         international.addView(button("UN observance calendar",()->openLink(DayContent.UN)));
         LinearLayout national=card("Importance of the day · India");
-        edit(national,data.national,"Add a verified Indian observance.",1200,value->data.national=value);
+        edit(national,data.national,"Add a verified Indian observance.",6000,value->data.national=value);
         String source=DayContent.nationalSource(data.date);
         if(!source.isEmpty())national.addView(button("Calendar source",()->openLink(source)));
+        importanceCount=text("",13,PURPLE);national.addView(importanceCount);updateImportanceCount();
         national.addView(text("The starter calendar is limited. 'No entry' does not mean there is no observance. Add school-specific or verified dates here.",13,MUTED));
         LinearLayout affirmation=card("Affirmation · "+data.date.format(DateTimeFormatter.ofPattern("MMMM yyyy",Locale.ENGLISH)));
         edit(affirmation,data.affirmation(this),"Type this month's affirmation here.",2000,value->data.affirmation(this,value));
@@ -209,31 +213,38 @@ public final class MainActivity extends Activity {
         brand.addView(button(logo==null?"Select school logo":"Replace school logo",()->startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*").addCategory(Intent.CATEGORY_OPENABLE),21)));
         LinearLayout review=card("Review before assembly");
         String issues=issues();review.addView(text(issues.isEmpty()?"All eight headlines and supporting sections are filled. Read the sources and confirm their relevance.":issues,14,MUTED));
-        CheckBox checked=new CheckBox(this);checked.setText("I have checked the facts, dates and suitability.");checked.setTextColor(INK);checked.setChecked(data.reviewed);
+        CheckBox checked=new CheckBox(this);checked.setText("I checked the original articles, publication dates and school suitability.");checked.setTextColor(INK);checked.setChecked(data.reviewed);
         checked.setOnCheckedChangeListener((v,yes)->{data.reviewed=yes;data.save(this);});review.addView(checked);
         review.addView(text("Edits reset the review flag. Unreviewed exports are marked DRAFT.",12,MUTED));
         LinearLayout export=card("A4 assembly sheet");
-        export.addView(text("School header, eight headlines and all assembly sections. Long edits continue onto another A4 page without clipping.",14,MUTED));
+        export.addView(text("Single-column arrangement matching your sample: news and weather first; importance of the day, thought, monthly affirmation and word on a new A4 page. Long text continues without clipping. Importance requires at least 100 words in total.",14,MUTED));
         export.addView(button("Preview & save PDF",this::preview));
         LinearLayout privacy=card("About this app");
-        privacy.addView(text("VIVA Assembly 0.1.0 · English · Dates use Asia/Kolkata. Drafts, logo and affirmations stay on this device. No login, AI API key, ads or analytics SDK.",13,MUTED));
-        privacy.addView(text("Refresh connects to Google News RSS and Open-Meteo. It retrieves headlines, not independently verified or AI-written news. Feeds can fail or return off-topic items; confirm that sports stories concern India internationally.",13,MUTED));
+        privacy.addView(text("VIVA Assembly 0.2.0 · English · Dates use Asia/Kolkata. Drafts, logo and affirmations stay on this device. No login, AI API key, ads or analytics SDK.",13,MUTED));
+        privacy.addView(text("Refresh connects to Google News RSS and Open-Meteo. It uses publisher-domain checks and exact previous-day IST publication filtering. Feed dates are metadata, not independent fact-checking: confirm the original article's publication date. Andhra Pradesh suggestions retain the publishers' Telugu text; edit into English if needed. Confirm sports stories concern India internationally.",13,MUTED));
         privacy.addView(text("Weather data: Open-Meteo, CC BY 4.0. Free endpoint is intended for non-commercial use. Word and thought banks rotate every 31 days. Monthly affirmation import supports UTF-8 .txt files.",13,MUTED));
         privacy.addView(button("Open-Meteo attribution",()->openLink("https://open-meteo.com/")));
     }
+    private void updateImportanceCount(){if(importanceCount!=null)importanceCount.setText("Importance of the day: "+ObservanceNotes.words(data.international+" "+data.national)+" words / minimum 100 (international + national combined).");}
     private String issues(){
         List<String> missing=new ArrayList<>();int filled=0,sourced=0,old=0;
-        for(NewsEngine.Item n:data.news)if(!n.title.trim().isEmpty()){filled++;if(NewsEngine.safeUrl(n.url))sourced++;if(!NewsEngine.recent(n,data.date,Instant.now()))old++;}
+        for(int i=0;i<8;i++){NewsEngine.Item n=data.news[i];if(!n.title.trim().isEmpty()){filled++;if(NewsEngine.allowed(n,i/2))sourced++;if(!NewsEngine.recent(n,data.date,Instant.now()))old++;}}
         if(filled<8)missing.add((8-filled)+" headline slots are empty.");
-        if(sourced<filled)missing.add((filled-sourced)+" headlines need a source link.");
-        if(old>0)missing.add(old+" headlines have missing/out-of-window publication dates.");
+        if(sourced<filled)missing.add((filled-sourced)+" headlines need an approved publisher source.");
+        if(old>0)missing.add(old+" headlines are not dated exactly "+data.date.minusDays(1)+" (India time).");
         if(data.weather.trim().isEmpty())missing.add("Weather is missing.");
         if(data.affirmation(this).trim().isEmpty())missing.add("Monthly affirmation is missing.");
         if(logo==null)missing.add("School logo has not been selected.");
-        if(data.international.contains("No entry")||data.national.contains("No entry"))missing.add("Check observances in the official calendars.");
+        if(!ObservanceNotes.sufficient(data.international,data.national))missing.add("Importance of the day needs at least 100 words in total.");
+        if(data.international.startsWith("No international")||data.national.startsWith("No Indian"))missing.add("An observance is unverified; check an official calendar.");
+        Set<String> titles=new HashSet<>();for(NewsEngine.Item n:data.news)if(!n.title.isEmpty()&&!titles.add(NewsEngine.canonical(n.title)))missing.add("Duplicate headline: choose a different story.");
         return String.join("\n",missing);
     }
     private void preview(){
+        for(int i=0;i<8;i++)if(!NewsEngine.eligible(data.news[i],i/2,data.date,Instant.now())){
+            new AlertDialog.Builder(this).setTitle("Previous-day news required").setMessage("Headline "+(i+1)+" must have an approved publisher and publication date "+data.date.minusDays(1)+" in India time. Refresh or correct its source details. Other dates and publishers cannot be exported.").setPositiveButton("OK",null).show();return;
+        }
+        if(!ObservanceNotes.sufficient(data.international,data.national)){toast("Expand Importance of the Day to at least 100 words in total.");return;}
         AssemblyData snapshot=data.copy();String affirmation=data.affirmation(this);Bitmap logoCopy=logo;
         toast("Preparing A4 preview…");
         worker.execute(()->{
